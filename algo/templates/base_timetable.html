@@ -1,0 +1,103 @@
+<style>
+    /* Add this CSS to your stylesheet or in a style tag in your HTML file */
+
+    .timetable {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .timetable h3 {
+        text-align: center;
+        color: black; /* Set the text color to black */
+    }
+
+    .timetable div {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #ccc;
+        padding: 8px;
+        background-color: white; /* Set the background color to white */
+    }
+
+    .timetable div:last-child {
+        border-bottom: none;
+    }
+
+    .timetable div span {
+        width: calc(100% / 9);  /* Adjusted width for the added header cell */
+        text-align: center;
+        color: black; /* Set the text color to black */
+    }
+
+    .timetable div span:not(:last-child) {
+        border-right: 1px solid #ccc;
+    }
+
+    /* Adjust this part based on your design preferences */
+    .timetable div span.active {
+        color: black; /* Set the text color to white */
+        font-weight: bold;
+    }
+</style>
+
+{% block timetable %}
+    <div class="timetable">
+        <h3>{% block timetable_title %}B.Tech {{ year }} - Div: {{ div }}{% endblock %}</h3>
+        
+        {% block timetable_content %}
+            <!-- Header row for slot numbers -->
+            <div>
+                <span></span>  <!-- Empty cell for day name -->
+                {% for slot_number in "12345678" %}
+                    <span>{{ slot_number }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Content rows -->
+            {% for row in timetable %}
+                <div>
+                    {% if forloop.counter is 1%}
+                    <span>
+                        Monday
+                    </span>
+                    {% elif forloop.counter is 2 %}
+                    <span>
+                        Tuesday
+                    </span>
+                    {% elif forloop.counter is 3 %}
+                    <span>
+                        Wednesday
+                    </span>
+                    {% elif forloop.counter is 4 %}
+                    <span>
+                        Thursday
+                    </span>
+                    {% elif forloop.counter is 5 %}
+                    <span>
+                        Friday
+                    </span>
+                    {% endif %}
+                    {% for cell in row %}
+                        {% if forloop.counter <= 4%}
+                            {% if cell %}
+                                {% for key,value in cell.items %}
+                                    <span class="active">{{ key.name }} <br><br> {{ value.name }} </span>
+                                {% endfor %}
+                            {% else %}
+                                <span>-</span>
+                            {% endif %}
+                        {% elif forloop.counter > 4%}
+                            {% if cell %}
+                                {% for key,value in cell.items %}
+                                    <span class="active">Practical: <br><br> {{ key.name }} <br><br> {{ value.name }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span>-</span>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endblock %}
+    </div>
+{% endblock %}

@@ -1,0 +1,254 @@
+<!-- templates/upload_file.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Teachers</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            max-width: 90vw;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        label {
+            flex: 1 1 100%;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        select {
+            flex: 1 1 70%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            flex: 1 1 20%;
+            margin-left: 10px;
+            padding: 8px;
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #add_btn_lab {
+            flex: 1 1 20%;
+            margin-left: 10px;
+            padding: 8px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            flex-wrap: wrap;
+            display: inline-block;
+        }
+
+        li {
+            border-bottom: 1px solid #ddd;
+            padding-left: 16px;
+            display: inline-block;
+            font-size: small;
+        }
+
+        input[type="submit"] {
+            flex: 1 1 100%;
+            margin-top: 10px;
+            background-color: #2196f3;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #platform {
+            display: flex;
+            flex-flow: column;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <h2>Assign Teachers</h2>
+    <!-- your_template.html -->
+<form method="post" enctype="multipart/form-data" action="{% url 'assign_lab' %}" id="myForm" name="myForm">
+    {% csrf_token %}
+    <div id="platform">
+        <h2> Lab Subjects </h2>
+        {% for sub in lab_sub_list %}
+            <div id="container_lab">
+                <select name="lab_additional_field_{{ forloop.counter }}">
+                    <option value="select">select</option>
+                    {% for teacher in all_teachers %}
+                        <option value="{{ teacher.name }}">{{ teacher.name }}</option>
+                    {% endfor %}
+                </select>
+                <button id="add_btn_lab" type="button" onclick="addNewItemLab('{{ forloop.counter }}')">Add</button>
+                <label>{{ sub.year }} : {{ sub.div }}: {{ sub.name }}</label>
+                <ul id="additionalItems_lab_{{ forloop.counter }}"></ul>
+                <input type="hidden" name="lab_additional_field_{{ forloop.counter }}" id="additionalItemsHidden_lab_{{ forloop.counter }}">
+            </div>
+        {% endfor %}
+        <input type="submit" value="Submit">
+    </div>
+</form>
+
+
+    <script>
+
+        var l_values = [
+            {% for subject in sub_list %}
+        "{{subject.l}}",
+            {% endfor %}
+        ];
+        var t_values = [
+            {% for subject in sub_list %}
+        "{{subject.t}}",
+            {% endfor %}
+        ];
+        var p_values = [
+            {% for subject in sub_list %}
+        "{{subject.p}}",
+            {% endfor %}
+        ];
+
+            var selectedTeacher1;
+            let sum1;
+            window.onload = (e) => {
+
+                {% for sub in lab_sub_list %}
+                    var counter = "{{forloop.counter}}"
+                    var ul = document.getElementById('additionalItems_lab_' + counter);
+                    console.log(ul)
+                    console.log("{{sub.name}}");
+                    var itemsCount = -1;
+                    {% for teacher in sub.teachers %}
+                        var li = document.createElement('li');
+                        selectedTeacher1 = '{{teacher.name}}';
+                        li.appendChild(document.createTextNode(selectedTeacher1));
+                        itemsCount++;
+                        //console.log(sum);
+                        if (itemsCount >= 1) {
+                            alert('You cannot add more than ' + 1 + ' faculties.');
+                            return; // Exit function if the limit is reached
+                        }
+
+                        var deleteButton1 = document.createElement('button');
+                        deleteButton1.type = 'button';
+                        deleteButton1.innerHTML = 'Delete';
+                        
+                        // Use a closure to capture the current values of ul and li
+                        deleteButton1.onclick = (function(ul, li, counter) {
+                            return function() {
+                                ul.removeChild(li);
+                                updateHiddenInputLab(counter);
+                            };
+                        })(ul, li, counter);
+
+                        li.appendChild(deleteButton1);
+                        ul.appendChild(li);
+
+                        // Update the hidden input with selected options
+                        updateHiddenInputLab(counter);
+                        console.log(selectedTeacher1);
+                    {% endfor %}
+                {% endfor %}
+            }
+
+
+        function addNewItemLab(counter) {
+            // Get the selected teacher from the dropdown
+
+            var dropdown = document.querySelector('[name="lab_additional_field_' + counter + '"]');
+            var selectedTeacher = dropdown.options[dropdown.selectedIndex].text;
+            var itemsCount = 0
+            
+            //console.log(itemsCount)
+            itemsCount = document.querySelectorAll('#additionalItems_lab_' + counter + ' li').length;
+            console.log(itemsCount)
+            //console.log(sum);
+            if (itemsCount >= 1) {
+                alert('You cannot add more than ' + 1 + ' faculties.');
+                return; // Exit function if the limit is reached
+            }
+            
+            // Create a new list item with delete button
+            if(selectedTeacher == 'select')
+                alert("Please select a teacher")
+            if(selectedTeacher != 'select')
+                var ul = document.getElementById('additionalItems_lab_' + counter);
+                var li = document.createElement('li');
+                li.appendChild(document.createTextNode(selectedTeacher));
+
+            var deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.innerHTML = 'Delete';
+            deleteButton.onclick = function() {
+                ul.removeChild(li);
+                updateHiddenInputLab(counter);
+            };
+
+            li.appendChild(deleteButton);
+            ul.appendChild(li);
+
+            // Update the hidden input with selected options
+            updateHiddenInputLab(counter);
+        }
+
+        function updateHiddenInputLab(counter) {
+            var ul = document.getElementById('additionalItems_lab_' + counter);
+            var selectedOptions = [];
+
+
+            // Iterate through the list items and extract text content
+            for (var i = 0; i < ul.children.length; i++) {
+                var listItem = ul.children[i];
+                // console.log(listItem);
+                var teacherName = listItem.textContent.trim();
+                // console.log(teacherName);
+                selectedOptions.push(teacherName);
+            }
+            
+            //console.log(selectedOptions);
+
+            var jsonString = JSON.stringify(selectedOptions);
+            //console.log(jsonString);
+
+            // Update the hidden input value with the selected options
+            var hiddenInput = document.getElementById('additionalItemsHidden_lab_' + counter);
+            hiddenInput.value = jsonString;
+            //console.log(hiddenInput);
+        }
+    </script>
+</body>
+</html>

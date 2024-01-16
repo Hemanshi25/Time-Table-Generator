@@ -1,0 +1,57 @@
+<!-- templates/upload_file.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results</title>
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script> {% endcomment %}
+    {% comment %} <script type="text/javascript" src="{% static 'jns/jspdf.umd.min.js' %}"></script> {% endcomment %}
+    <script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+
+</head>
+<body>
+    <style>
+        h2 {
+            text-align: center;
+            color: black; /* You can change the color as needed */
+            font-family: 'Arial', sans-serif; /* You can change the font-family as needed */
+            border: 7px double;
+        }
+    </style>
+    
+    <button id="downloadBtn">Download as PDF</button>
+    <form method="post" enctype="multipart/form-data">
+        
+        {% csrf_token %}
+        <h2 style="margin-top: 20px;">Students Time Table</h2>
+        {% for timetable in ttA %}
+            {% with year=forloop.counter %}
+                {% include 'base_timetable.html' with timetable=timetable year=year div="A" days=days%}
+                <br><br>
+            {% endwith %}
+        {% endfor %}
+        {% for timetable in ttB %}
+            {% with year=forloop.counter %}
+                {% include 'base_timetable.html' with timetable=timetable year=year div="B" days=days%}
+                <br><br>
+            {% endwith %}
+        {% endfor %}
+
+        <h2 style="margin-top: 20px;">Teachers Time Table</h2>
+        {% for teacher in all_teachers %}
+            {% include 'teacher_base_timetable.html' with timetable=teacher.tt_matrix year=teacher.name days=days%}
+            <br><br>
+        {% endfor %}
+        <button id="downloadBtn">Download as PDF</button>
+    </form>
+    <script>
+        document.getElementById('downloadBtn').addEventListener('click', function () {
+    // Capture the content of your screen (you may need to customize this based on your specific requirements)
+    var content = document.body;
+
+    // Generate the PDF using html2pdf
+    html2pdf(content);
+  });
+
+    </script>
+</body>
+</html>
